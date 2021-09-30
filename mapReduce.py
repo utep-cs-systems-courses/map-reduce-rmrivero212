@@ -38,14 +38,30 @@ def countTargetWord(target, texts):
         wordCount += text.count(target.upper())
     return wordCount
 
+def countAllWords(wordList, texts):
+    wordCount = 0;
+    for word in wordList:
+        wordCount = countTargetWord(word, texts)
+        print(f'{word}: {wordCount}')
+        wordCount = 0;
+
+def countAllWordsParallel(wordList, texts):
+    wordCount = pymp.shared.list([0])
+
+    with pymp.Parallel(1) as p:
+        wordCountLock = p.lock
+        for word in wordList:
+            wordCountLock.acquire()
+            wordCount = countTargetWord(word, texts)
+            print(f'{word}: {wordCount}')
+            wordCountLock.release()
+
 def main():
-
     
+    words = ["hate","love","death","night","sleep","time","henry","hamlet","you","my","blood","poison","macbeth","king","heart","honest"]
     strings = createArrayOfTexts()
-    count = countTargetWord("you", strings)
 
-    print('number of occurences: ', count)
-    
+    countAllWordsParallel(words, strings)
     
     
     
