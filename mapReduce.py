@@ -44,25 +44,35 @@ def countAllWords(wordList, texts):
         wordCount = countTargetWord(word, texts)
         print(f'{word}: {wordCount}')
         wordCount = 0;
-
+        
 def countAllWordsParallel(wordList, texts):
-    wordCount = pymp.shared.list([0])
+    wordCount = pymp.shared.dict()
 
-    with pymp.Parallel(1) as p:
+    with pymp.Parallel(8) as p:
         wordCountLock = p.lock
-        for word in wordList:
+        for word in p.iterate(wordList):
             wordCountLock.acquire()
             wordCount = countTargetWord(word, texts)
             print(f'{word}: {wordCount}')
             wordCountLock.release()
+            
 
 def main():
     
     words = ["hate","love","death","night","sleep","time","henry","hamlet","you","my","blood","poison","macbeth","king","heart","honest"]
     strings = createArrayOfTexts()
 
+
+    start = time.clock_gettime(time.CLOCK_MONOTONIC)
+    countAllWords(words, strings)
+    end = time.clock_gettime(time.CLOCK_MONOTONIC)
+
+    startPar = time.clock_gettime(time.CLOCK_MONOTONIC)
     countAllWordsParallel(words, strings)
-    
+    endPar = time.clock_gettime(time.CLOCK_MONOTONIC)
+
+    print("Time to process using serial countAllWords: ", str(end - start))
+    print("Time to process using countAllWordsParallel: ", str(endPar - startPar))
     
     
     
